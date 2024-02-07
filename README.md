@@ -1,4 +1,5 @@
-![image](https://github.com/jkm2000korea/python_pptx/assets/77305773/fae59ddf-6fad-41cb-ab52-1b6e1f43100a)
+![image](https://github.com/jkm2000korea/python_pptx/assets/77305773/7282d610-8e6d-4e1f-a255-88a6c434faf7)
+
 ![image](https://github.com/jkm2000korea/python_pptx/assets/77305773/ed6620dc-c93f-4f66-be74-f6378a115ec1)
 ![image](https://github.com/jkm2000korea/python_pptx/assets/77305773/824d51bf-e75e-47cc-9533-2d6864adbbcc)
 ![image](https://github.com/jkm2000korea/python_pptx/assets/77305773/8bc67518-2a51-44de-87cf-6eca90329e22)
