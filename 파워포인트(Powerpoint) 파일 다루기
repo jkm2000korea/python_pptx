@@ -1,0 +1,120 @@
+파워포인트(Powerpoint) 파일 다루기
+from openpyxl import load_workbook
+from pptx import Presentation
+from pptx.util import Inches
+from pptx.enum.chart import XL_CHART_TYPE
+from pptx.chart.data import CategoryChartData
+import pandas as pd
+import pandas as pd
+import numpy as np
+
+# A제품 데이터
+data_a = {'판매월': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+          '판매량': [70, 65, 80, 75, 82, 73, 99, 100, 101, 102, 103, 105],
+          '판매금액': [140000, 130000, 160000, 150000, 164000, 146000, 140000, 130000, 160000, 150000, 164000, 146000]}
+
+df_a = pd.DataFrame(data_a)
+
+# B제품 데이터
+data_b = {'판매월': np.arange(1, 13),
+          '판매량': [60, 55, 70, 65, 72, 63, 70, 65, 80, 75, 82, 73],
+          '판매금액': [120000, 110000, 140000, 130000, 144000, 126000, 120000, 110000, 140000, 130000, 144000, 126000]}
+
+df_b = pd.DataFrame(data_b)
+
+# C제품 데이터
+data_c = {'판매월': np.arange(1, 13),
+          '판매량': [75, 70, 85, 80, 87, 78, 75, 70, 85, 80, 87, 78],
+          '판매금액': [150000, 140000, 170000, 160000, 174000, 156000, 150000, 140000, 170000, 160000, 174000, 156000]}
+
+df_c = pd.DataFrame(data_c)
+
+# Excel 파일로 저장
+writer = pd.ExcelWriter('제품별 판매내역.xlsx')
+df_a.to_excel(writer, sheet_name='A제품', index=False)
+df_b.to_excel(writer, sheet_name='B제품', index=False)
+df_c.to_excel(writer, sheet_name='C제품', index=False)
+writer.save()
+# 엑셀 파일에서 데이터 불러오기
+wb = load_workbook('제품별 판매내역.xlsx')
+sheet_names = wb.sheetnames
+
+# 파워포인트 객체 생성
+prs = Presentation()
+
+# 표지 슬라이드 추가
+slide_layout = prs.slide_layouts[0]
+slide = prs.slides.add_slide(slide_layout)
+slide.shapes.title.text = "2024년 제품별 판매현황 분석"
+
+# 제품별 판매량 데이터를 저장하기 위한 딕셔너리
+sales_data = {}
+
+# 각 제품별 슬라이드 생성
+for sheet_name in sheet_names:
+    sheet = wb[sheet_name]
+    # 제품 전체 판매 데이터 저장 (판매월, 판매량, 판매금액)
+    data = [list(map(str, row)) for row in sheet.iter_rows(values_only=True)]
+
+    # 제품의 판매량 데이터 저장
+    sales_data[sheet_name] = [list(map(int, row[1:2])) for row in data[1:]]
+
+    # 슬라이드 추가
+    slide_layout = prs.slide_layouts[5]
+    slide = prs.slides.add_slide(slide_layout)
+    slide.shapes.title.text = f"{sheet_name}"
+
+    # 표 추가
+    rows, cols = len(data), len(data[0])
+    table = slide.shapes.add_table(rows+1, cols, Inches(0.3), Inches(1.5), Inches(4.3), Inches(6)).table
+
+    # "월별 판매 현황" 추가
+    table.cell(0, 0).text = "2024년 월별 판매 현황"
+    table.cell(0, 0).merge(table.cell(0, cols - 1))
+
+    # 데이터를 표에 추가
+    for row_idx, row_val in enumerate(data):
+        for col_idx, val in enumerate(row_val):
+            table.cell(row_idx+1, col_idx).text = str(val)
+
+
+    # 차트 데이터 설정
+    chart_data = CategoryChartData()
+    chart_data.categories = [row[0] for row in data[1:]]
+    chart_data.add_series('2024년 월별 판매량 트렌드', (row[1] for row in data[1:]))
+
+    # 차트 추가
+    x, y, cx, cy = Inches(5), Inches(1.4), Inches(4.5), Inches(6)
+    chart = slide.shapes.add_chart(XL_CHART_TYPE.COLUMN_CLUSTERED, x, y, cx, cy, chart_data).chart
+
+    # 차트 설정
+    chart.has_legend = False
+    chart.plots[0].has_data_labels = True
+
+# 전체 판매 추이 슬라이드 생성
+slide_layout = prs.slide_layouts[5]
+slide = prs.slides.add_slide(slide_layout)
+slide.shapes.title.text = "2024년 제품별 판매 추이"
+
+# 전체 판매 추이 차트 데이터 설정
+chart_data = CategoryChartData()
+chart_data.categories = [row[0] for row in data[1:]]
+for sheet_name, sales in sales_data.items():
+    chart_data.add_series(sheet_name, (sale[0] for sale in sales))
+
+# 전체 판매 추이 차트 추가
+x, y, cx, cy = Inches(1), Inches(2), Inches(8), Inches(4.5)
+chart = slide.shapes.add_chart(XL_CHART_TYPE.LINE, x, y, cx, cy, chart_data).chart
+
+# 차트 설정
+chart.has_legend = True
+chart.legend.include_in_layout = False
+chart.category_axis.has_major_gridlines = False
+
+# 마지막 슬라이드 추가
+slide_layout = prs.slide_layouts[0]
+slide = prs.slides.add_slide(slide_layout)
+slide.shapes.title.text = "감사합니다."
+
+# 결과 저장
+prs.save('2024년_제품별_판매현황_분석.pptx')
