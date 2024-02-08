@@ -1,0 +1,96 @@
+from pptx import Presentation
+from pptx.util import Cm
+import pandas as pd
+import os
+import copy
+
+prs = Presentation('Best Global Brands 2022_interbrand_template.pptx')
+slide = prs.slides[0]
+
+df = pd.read_excel("Best Global Brands 2022_interbrand.xlsx")
+
+cwd = os.getcwd()
+logos = [file for file in os.listdir(f"{cwd}\logos") if os.path.isfile(f"{cwd}\logos\{file}")]
+charts = [file for file in os.listdir(f"{cwd}\charts") if os.path.isfile(f"{cwd}\charts\{file}")]
+check = f"{cwd}\images\check.png"
+
+def select_shape_by_text(slide, text):
+    for x in slide.shapes:
+        if x.has_text_frame and x.text == text:
+            return x
+    print('요청한 Shape를 찾을 수 없습니다.')
+    
+def select_table_by_text(slide, text):
+    for x in slide.shapes:
+        if x.has_table and x.table.cell(0,0).text == text:
+            return x.table
+    print('요청한 Shape를 찾을 수 없습니다.')
+     
+def copy_slide(prs, index):
+    template = prs.slides[index]
+    try:
+        blank_slide_layout = prs.slide_layouts.get_by_name('빈 화면')
+    except:
+        blank_slide_layout = prs.slide_layouts[0]
+    copied_slide = prs.slides.add_slide(blank_slide_layout)
+    
+    for shape in template.shapes:
+        elem = shape.element
+        new_elem = copy.deepcopy(elem)
+        copied_slide.shapes._spTree.insert_element_before(new_elem, 'p:extLst')
+    return copied_slide
+
+for i, r in df.iterrows():
+    copied_slide = copy_slide(prs, 0)
+    
+    brand_name = select_shape_by_text(copied_slide, 'Brand name').text_frame
+    p = brand_name.paragraphs[0]
+    run = p.runs[0]
+    run.text =  r['브랜드명']
+    
+    comment = select_shape_by_text(copied_slide, 'comment').text_frame
+    p = comment.paragraphs[0]
+    run = p.runs[0]
+    run.text =  r['코멘트']
+    
+    table = select_table_by_text(copied_slide, 'Rank')
+    
+    rank = table.cell(0,1).text_frame
+    p = rank.paragraphs[0]
+    run = p.runs[0]
+    run.text =  str(r['순위'])
+    
+    value = table.cell(1,1).text_frame
+    p = value.paragraphs[0]
+    run = p.runs[0]
+    run.text = f"{r['브랜드가치']:,} $m"
+    
+    growth = table.cell(2,1).text_frame
+    p = growth.paragraphs[0]
+    run = p.runs[0]
+    run.text = f"{r['성장률']:.0%}"
+    
+    copied_slide.shapes.add_picture(check, Cm(18.05), Cm(4.05), width=None, height=None)
+
+    chart = [x for x in charts if r['브랜드명'] in x][0]
+    chart = f"{cwd}\charts\{chart}"
+    copied_slide.shapes.add_picture(chart, Cm(16.93), Cm(2.77), width=Cm(16), height=Cm(8))
+    
+    logo = [x for x in logos if r['브랜드명'] in x][0]
+    logo = f"{cwd}\logos\{logo}"
+    inserted_logo = copied_slide.shapes.add_picture(logo, Cm(2.38), Cm(4.81))
+    
+    if inserted_logo.height>Cm(2):
+        inserted_logo.width = int(inserted_logo.width * (Cm(2)/inserted_logo.height))
+        inserted_logo.height = Cm(2)
+        
+    if inserted_logo.width>Cm(6):
+        inserted_logo.height = int(inserted_logo.height * (Cm(6)/inserted_logo.width))
+        inserted_logo.width = Cm(6)
+        
+    if inserted_logo.height < Cm(2) :
+        inserted_logo.top = int(Cm(4.81) + (Cm(2)-inserted_logo.height)*0.5)
+
+prs.save('2024 글로벌 기업 브랜드 가치 조사 리포트.pptx')
+
+# 참고 블로그 : https://jgws.tistory.com/8
