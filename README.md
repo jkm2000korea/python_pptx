@@ -1,3 +1,13 @@
+2024 Economic Real Estate Outlook Report Automation feat. python-pptx
+Data collection, analysis, report generation Automation Code
+
+![image](https://github.com/jkm2000korea/python_pptx/assets/77305773/8f6ad7f8-04b5-4608-a504-c4d81a47c122)
+![image](https://github.com/jkm2000korea/python_pptx/assets/77305773/63859357-4217-47a3-a3fa-c240a2976604)
+![image](https://github.com/jkm2000korea/python_pptx/assets/77305773/53ae3e01-4ac2-48cc-91c7-510b781a36fe)
+
+2024 경제 부동산 전망 리포트 자동화 feat. python-pptx
+데이터 수집, 분석, 리포트 생성 Automation Code
+
 ![image](https://github.com/jkm2000korea/python_pptx/assets/77305773/eab17763-ed6c-4c2c-86b8-ca2378ee5c86)
 
 ![image](https://github.com/jkm2000korea/python_pptx/assets/77305773/ed6620dc-c93f-4f66-be74-f6378a115ec1)
